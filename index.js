@@ -2,7 +2,8 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const URL = require("./models/url");
-const { restrictedToOnlyLoggedUser,authOnly } = require("./middlewares/auth");
+// const { restrictedToOnlyLoggedUser,authOnly } = require("./middlewares/auth");
+const { checkForAuthentication, restrictTo } = require("./middlewares/auth");
 const app = express();
 const PORT = 8001;
 
@@ -27,7 +28,7 @@ app.set("views", path.resolve("./views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-
+app.use(checkForAuthentication);
 // app.use("/test", async (req, res) => {
 //   const allUrls = await URL.find({});
 //   return res.render("home", {
@@ -37,8 +38,8 @@ app.use(cookieParser());
 //   return res.render("home");
 // });
 
-app.use("/url", restrictedToOnlyLoggedUser, urlRouter);
-app.use("/", authOnly,staticRoute);
+app.use("/url", restrictTo(["NORMAL"]), urlRouter);
+app.use("/", staticRoute);
 app.use("/user", userRouter);
 
 app.listen(PORT, () => {
